@@ -1,0 +1,325 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#f5f5f0">
+<title>Kitchen Colour Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f5f1;color:#26332f;font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{max-width:1120px;margin:auto;padding:17px 14px 12px}
+h1{font-size:23px;letter-spacing:-.5px;margin:0 0 3px}
+header p{margin:0;color:#6b7771;font-size:13px}
+main{max-width:1120px;margin:auto;padding:0 10px 28px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.9fr);gap:12px}
+.panel{background:#fff;border:1px solid #e1e6e1;border-radius:15px;overflow:hidden;box-shadow:0 4px 18px #253b2b0a}
+.photohead{padding:10px 13px;border-bottom:1px solid #edf0ec;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.photohead b{font-size:13px}
+.photohead span,.note{font-size:11px;color:#748079}
+.stage{position:relative;line-height:0;background:#ddd}
+.stage img{width:100%;height:auto;display:block}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.region{fill:transparent;fill-opacity:1;mix-blend-mode:normal;stroke:#fff;stroke-opacity:.85;stroke-width:1.7;vector-effect:non-scaling-stroke;cursor:pointer}
+.region.painted{fill:var(--paint);fill-opacity:.90}
+.region.active{stroke:#fff;stroke-width:4;filter:drop-shadow(0 0 3px #183a35)}
+.foot{padding:8px 12px;border-top:1px solid #edf0ec;color:#78827c;font-size:11px}
+.controls{padding:13px;display:flex;flex-direction:column;gap:13px}
+.heading{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#66756e;margin:0 0 7px}
+.regions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.regionbtn{min-height:38px;border:1px solid #e1e7e2;border-radius:9px;background:#fff;text-align:left;padding:7px 8px;display:flex;align-items:center;gap:7px;color:#34413b;font-size:11px}
+.regionbtn.selected{border-color:#4b887a;background:#edf6f1}
+.dot{width:15px;height:15px;flex:none;border-radius:4px;border:1px solid #0002}
+.pickerrow{display:flex;gap:10px;align-items:center}
+.pickerrow input{width:48px;height:40px;border:0;padding:0;background:none}
+.hex{font:12px ui-monospace,monospace;color:#56645d}
+.families{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0}
+.family{border:1px solid #e1e7e2;border-radius:30px;background:#fff;padding:6px 9px;font-size:11px;color:#53615a}
+.family.on{background:#315f55;color:#fff;border-color:#315f55}
+.palette{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px;max-height:290px;overflow:auto;padding:3px 2px}
+.swatch{height:29px;border:2px solid #fff;border-radius:7px;box-shadow:0 0 0 1px #d8dfd9;cursor:pointer;min-width:0}
+.swatch:active{transform:scale(.94)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.actions button,.savebtn{border:1px solid #dfe6e0;background:#fff;color:#34423b;border-radius:9px;padding:10px 7px;font-size:11px;font-weight:650}
+.actions .primary,.savebtn{background:#315f55;border-color:#315f55;color:#fff}
+.small{font-size:11px;color:#748079;margin:0}
+.bottomrow{display:flex;gap:7px}
+.bottomrow button{flex:1}
+.note{line-height:1.45}
+@media(max-width:760px){
+main{grid-template-columns:1fr;padding:0 8px 22px;gap:9px}
+header{padding:14px 11px 10px}
+.controls{padding:11px}
+.palette{grid-template-columns:repeat(10,minmax(0,1fr));max-height:260px}
+.stage{max-height:none}
+}
+.regionbtn{cursor:pointer;position:relative;display:flex;align-items:center;gap:7px}
+.regionbtn .regionname{flex:1}
+.regionbtn .pickmark{font-weight:900;color:#276e5e;min-width:14px;text-align:center}
+.regionbtn.selected{border:2px solid #438b79;background:#eaf5ef}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:active{transform:scale(.985)}
+</style>
+</head>
+<body>
+<header>
+<h1>Kitchen Colour Studio</h1>
+<p>Try colours on this cleaner kitchen photo. Select each door separately or colour groups together.</p>
+</header>
+<main>
+<section class="panel">
+<div class="photohead"><b>Your selected kitchen photo</b><span>Tap a cabinet panel</span></div>
+<div class="stage">
+<img id="base" alt="Kitchen preview" src="kitchen.jpg">
+<svg viewBox="0 0 709 533" preserveAspectRatio="none">
+<!-- upper cupboards -->
+<polygon class="region" data-name="Upper left door" points="401,0 461,0 461,126 401,146"/>
+<polygon class="region" data-name="Upper middle-left door" points="462,0 502,0 502,111 462,126"/>
+<polygon class="region" data-name="Upper middle-right door" points="503,0 565,0 565,88 503,110"/>
+<polygon class="region" data-name="Upper right door" points="566,0 646,0 646,59 566,87"/>
+<!-- lower trolley panels -->
+<polygon class="region" data-name="Lower left large door" points="179,327 268,327 268,443 180,445"/>
+<polygon class="region" data-name="Lower centre upper drawer" points="267,327 331,327 331,364 267,364"/>
+<polygon class="region" data-name="Lower centre middle drawer" points="267,363 331,363 331,398 267,398"/>
+<polygon class="region" data-name="Lower centre bottom drawer" points="267,397 331,397 331,443 267,443"/>
+<polygon class="region" data-name="Lower right upper drawer" points="330,327 391,327 391,364 330,364"/>
+<polygon class="region" data-name="Lower right middle drawer" points="330,363 391,363 391,398 330,398"/>
+<polygon class="region" data-name="Lower right bottom drawer" points="330,397 391,397 391,442 330,442"/>
+<polygon class="region" data-name="Lower corner drawer" points="390,327 433,327 433,421 390,442"/>
+<polygon class="region" data-name="Corner side door" points="432,327 502,327 502,444 432,421"/>
+<!-- tall shelf doors -->
+<polygon class="region" data-name="Tall left upper door" points="503,60 565,39 565,321 503,321"/>
+<polygon class="region" data-name="Tall right upper door" points="566,39 647,0 647,321 566,321"/>
+<polygon class="region" data-name="Tall left lower door" points="503,322 565,322 565,479 503,454"/>
+<polygon class="region" data-name="Tall right lower door" points="566,322 647,322 647,523 566,480"/>
+</svg>
+</div>
+<div class="foot">Colour overlays are visual approximations. The photo, room, countertop and layout are unchanged.</div>
+</section>
+<aside class="panel controls">
+<div>
+<p class="heading">1 · Select any number of doors / drawers</p>
+<p class="small" id="selectionCount">1 panel selected · tap more panels to add them</p>
+<div class="actions" style="margin:7px 0">
+<button type="button" id="selectLower">Select all lower trolley</button>
+<button type="button" id="selectAllPanels">Select every panel</button>
+<button type="button" id="clearSelection">Clear selection</button>
+</div>
+<div class="regions" id="regions"></div>
+</div>
+<div>
+<p class="heading">2 · Huge colour palette</p>
+<div class="pickerrow">
+<input id="picker" type="color" value="#4c9ca0">
+<span class="hex" id="hex">#4C9CA0</span>
+<span class="small">Custom colour</span>
+</div>
+<div class="families" id="families"></div>
+<div class="palette" id="palette"></div>
+<p class="small" style="margin-top:6px">Tap multiple panels in the list or directly on the photo, then tap a swatch to colour all selected panels. Scroll for more shades.</p>
+</div>
+<div>
+<p class="heading">3 · Quick apply</p>
+<div class="actions">
+<button type="button" class="primary" id="one">Apply to selected panels</button>
+<button type="button" id="lower">Apply to all lower trolley</button>
+<button type="button" id="upper">Apply to all upper cupboards</button>
+<button type="button" id="tall">Apply to tall shelf doors</button>
+<button type="button" id="all">Apply to every cabinet</button>
+<button type="button" id="reset">Reset to photo colours</button>
+</div>
+</div>
+<div class="bottomrow">
+<button type="button" class="savebtn" id="save">Save preview image</button>
+<button type="button" id="download">Download studio</button>
+</div>
+<p class="note">Tip: try a medium shade on the lower trolley and tall doors, then a lighter coordinating shade on the upper cupboards. This file works offline after download.</p>
+</aside>
+</main>
+<script>
+"use strict";
+const regions = Array.from(document.querySelectorAll(".region"));
+const list = document.getElementById("regions");
+const picker = document.getElementById("picker");
+const hex = document.getElementById("hex");
+const palette = document.getElementById("palette");
+const families = document.getElementById("families");
+const countLabel = document.getElementById("selectionCount");
+const lowerGroup = [4,5,6,7,8,9,10,11,12];
+const upperGroup = [0,1,2,3];
+const tallGroup = [13,14,15,16];
+let selected = [0];
+const colors = Array(regions.length).fill(null);
+const familyData = {
+"All":[],
+"Blue-green":["#DDF0E9","#C5E5DC","#A9D8CC","#87C8BA","#68B7A9","#4C9F97","#348B83","#267B76","#176B68","#0E5B5C"],
+"Green":["#E8F0D5","#D7E8B9","#C2D99B","#A9C87D","#8FB764","#779F4F","#668C42","#557A38","#42662F","#315528"],
+"Yellow":["#FFF2B8","#FFE68A","#F9D66B","#F4C94E","#EAB936","#DCA51F","#C99117","#B27C12","#95650F","#79510D"],
+"Orange":["#FCE2C6","#F8C99F","#F2AD79","#EC925C","#E77B43","#D96835","#C65A2B","#B34B25","#963E20","#78331D"],
+"Red":["#F9D5CE","#F2B3A5","#E99482","#DF765F","#D65E49","#C64A39","#B43C31","#9D332B","#852A25","#6D211F"],
+"Brown":["#EAD9C6","#D9C0A5","#C6A181","#B58B68","#A47756","#906746","#7B573C","#684832","#573B2B","#432D22"],
+"Beige":["#F2E4CF","#EAD7BA","#E1C8A5","#D6B991","#C9A77B","#BA9569","#A9845B","#96734E","#806344","#6B523A"],
+"Blue":["#DCEAF3","#C4DDEA","#A7CCDF","#87B9D3","#6AA5C4","#4D91B4","#397D9F","#2E6B8B","#245875","#1B465E"],
+"Teal":["#D8EEEA","#B9DED8","#95CCC4","#72B8B0","#559F9A","#3D8986","#2E7474","#245F62","#1D4E53","#153F45"],
+"Olive":["#E8E8C9","#D7D8A8","#C4C687","#ADB16A","#969A54","#7E8345","#6C713A","#5A6032","#494D29","#393D22"],
+"Grey":["#ECEFED","#D8DEDA","#C2CBC5","#AAB6AE","#929F97","#7B8981","#65736B","#505E57","#3E4A44","#2D3732"],
+"Neutral warm":["#F5E7D7","#EAD6C0","#DEC3A7","#D1AF8F","#C19A78","#AE8565","#997252","#805E43","#694B36","#523B2B"]
+};
+const allColors = [];
+Object.keys(familyData).forEach(f => {
+if(f !== "All") familyData[f].forEach((c,i)=>allColors.push({color:c,family:f,index:i}));
+});
+function updateSelectionUI(){
+regions.forEach((r,i)=>r.classList.toggle("active",selected.includes(i)));
+Array.from(list.children).forEach((b,i)=>{
+b.classList.toggle("selected",selected.includes(i));
+b.setAttribute("aria-pressed",selected.includes(i)?"true":"false");
+b.querySelector(".dot").style.background=colors[i]||"transparent";
+b.querySelector(".pickmark").textContent=selected.includes(i)?"✓":"";
+});
+countLabel.textContent=selected.length+" panel"+(selected.length===1?"":"s")+" selected · tap more to add";
+}
+function togglePanel(i){
+if(selected.includes(i)){
+if(selected.length>1) selected=selected.filter(x=>x!==i);
+}else selected.push(i);
+updateSelectionUI();
+}
+function applyColor(indices,c){
+if(!c)return;
+indices.forEach(i=>{
+colors[i]=c;
+regions[i].style.setProperty("--paint",c);
+regions[i].classList.add("painted");
+list.children[i].querySelector(".dot").style.background=c;
+});
+picker.value=c;
+hex.textContent=c.toUpperCase();
+updateSelectionUI();
+}
+function applyToSelected(){
+if(!selected.length){
+countLabel.textContent="Select one or more panels first";
+return;
+}
+applyColor(selected.slice(),picker.value);
+}
+function applyGroup(groupName){
+const group=groupName==="lower"?lowerGroup:groupName==="upper"?upperGroup:groupName==="tall"?tallGroup:regions.map((_,i)=>i);
+selected=group.slice();
+applyColor(group,picker.value);
+}
+function selectLower(){selected=lowerGroup.slice();updateSelectionUI();}
+function clearSelection(){
+selected=[];
+updateSelectionUI();
+countLabel.textContent="No panels selected · tap panels to select";
+}
+function selectAllPanels(){selected=regions.map((_,i)=>i);updateSelectionUI();}
+function resetAll(){
+regions.forEach((r,i)=>{
+colors[i]=null;
+r.style.removeProperty("--paint");
+r.classList.remove("painted");
+});
+selected=[0];
+picker.value="#4c9ca0";
+hex.textContent="#4C9CA0";
+updateSelectionUI();
+}
+regions.forEach((r,i)=>{
+const b=document.createElement("button");
+b.type="button";
+b.className="regionbtn";
+b.innerHTML='<span class="dot"></span><span class="regionname">'+r.dataset.name+'</span><span class="pickmark"></span>';
+b.onclick=()=>togglePanel(i);
+list.appendChild(b);
+r.onclick=()=>togglePanel(i);
+});
+let currentFamily="All";
+function renderPalette(){
+palette.innerHTML="";
+const shades=currentFamily==="All"?allColors:allColors.filter(x=>x.family===currentFamily);
+shades.forEach(item=>{
+const b=document.createElement("button");
+b.type="button";
+b.className="swatch";
+b.style.background=item.color;
+b.title=item.family+" shade "+(item.index+1)+" "+item.color;
+b.onclick=()=>{
+if(selected.length===0){
+countLabel.textContent="Select one or more panels first";
+return;
+}
+applyColor(selected.slice(),item.color);
+};
+palette.appendChild(b);
+});
+}
+Object.keys(familyData).forEach(f=>{
+const b=document.createElement("button");
+b.type="button";
+b.className="family"+(f==="All"?" on":"");
+b.textContent=f;
+b.onclick=()=>{
+currentFamily=f;
+Array.from(families.children).forEach(x=>x.classList.toggle("on",x===b));
+renderPalette();
+};
+families.appendChild(b);
+});
+picker.oninput=()=>{
+hex.textContent=picker.value.toUpperCase();
+if(selected.length)applyColor(selected.slice(),picker.value);
+else countLabel.textContent="Select one or more panels first";
+};
+document.getElementById("one").onclick=applyToSelected;
+document.getElementById("lower").onclick=()=>applyGroup("lower");
+document.getElementById("upper").onclick=()=>applyGroup("upper");
+document.getElementById("tall").onclick=()=>applyGroup("tall");
+document.getElementById("all").onclick=()=>applyGroup("all");
+document.getElementById("selectLower").onclick=selectLower;
+document.getElementById("clearSelection").onclick=clearSelection;
+document.getElementById("reset").onclick=resetAll;
+document.getElementById("selectAllPanels").onclick=selectAllPanels;
+document.getElementById("save").onclick=()=>{
+const img=document.getElementById("base");
+if(!img.complete||!img.naturalWidth){
+alert("Please wait for the kitchen photo to load.");
+return;
+}
+const canvas=document.createElement("canvas");
+canvas.width=709;canvas.height=533;
+const ctx=canvas.getContext("2d");
+ctx.drawImage(img,0,0,709,533);
+regions.forEach((r,i)=>{
+if(!colors[i])return;
+const pts=r.getAttribute("points").trim().split(/\s+/).map(p=>p.split(",").map(Number));
+ctx.beginPath();
+pts.forEach((p,j)=>j?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+ctx.closePath();
+ctx.globalAlpha=.90;
+ctx.fillStyle=colors[i];
+ctx.globalCompositeOperation="source-over";
+ctx.fill();
+ctx.globalAlpha=1;
+});
+const a=document.createElement("a");
+a.download="my-kitchen-colour-preview.png";
+a.href=canvas.toDataURL("image/png");
+a.click();
+};
+document.getElementById("download").onclick=()=>{
+const blob=new Blob([document.documentElement.outerHTML],{type:"text/html"});
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;
+a.download="index.html";
+a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1500);
+};
+updateSelectionUI();
+renderPalette();
+</script>
+</body>
+</html>
